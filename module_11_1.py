@@ -5,16 +5,37 @@ from weatherapi.models.astronomy import Astronomy
 import translators as ts
 
 
+st = datetime.datetime.now()
+today = datetime.datetime.now()
+
+# Форматируем дату
+formatted_date = today.strftime("%d.%m.%Y")
+
 API_KEY = '18da05fe144644a1969140903242409'
-city = 'Chelyabinsk'
-SITE_URL = f'http://api.weatherapi.com/v1/current.json?key={API_KEY}&q={city}&aqi=yes&lang=ru'
-astro_url = f'https://api.weatherapi.com/v1/astronomy.json?key={API_KEY}&q=Chelyabinsk&dt=25.09.2024'
+
+
+def choice_city():
+    city = int(input(f'Выбирете город из списка:\n1-Москва,\n2-Челябинск,\n3-Ленинград,\n4-Санкт-Петербург,\n5-Новосибирск,\n6-Екатеринбург\nВаш выбор: '))
+    if city == 1:
+        return 'Moscow'
+    elif city == 2:
+        return 'Chelyabinsk'
+    elif city == 3:
+        return 'Leningrad'
+    elif city == 4:
+        return 'Peterburg'
+    elif city == 5:
+        return 'Novosibirsk'
+    elif city == 6:
+        return 'Ekaterinburg'
+
 
 def tt(text): # Переводим текст с английского на русский
     return (ts.translate_text(text, translator='yandex', to_language='ru'))
 
 
-def general_data(): # Получаем основные данные о погоде
+def general_data(city): # Получаем основные данные о погоде
+    SITE_URL = f'http://api.weatherapi.com/v1/current.json?key={API_KEY}&q={city}&aqi=yes&lang=ru'
     response = requests.get(SITE_URL)
     if response.status_code == 200:
         # Парсим ответ в формате JSON
@@ -33,7 +54,8 @@ def general_data(): # Получаем основные данные о пого
         print(f'Скорость ветра: {wind_kph} км/ч')
         print(f'Состояние: {condition}')
 
-def astronomy_data(): # Получаем астрономические данные о лунной фазе и восходе солнца
+def astronomy_data(city): # Получаем астрономические данные о лунной фазе и восходе солнца
+    astro_url = f'https://api.weatherapi.com/v1/astronomy.json?key={API_KEY}&q={city}&dt={formatted_date}'
     response = requests.get(astro_url)
 
     if response.status_code == 200:
@@ -47,7 +69,8 @@ def astronomy_data(): # Получаем астрономические данн
         print(f'Фаза луны: {tt(moon_phase)}')
         print(f'Восход солнца: {sunrise}')
 
-def air_data(): # Получаем данные воздуха
+def air_data(city): # Получаем данные воздуха
+    SITE_URL = f'http://api.weatherapi.com/v1/current.json?key={API_KEY}&q={city}&aqi=yes&lang=ru'
     response = requests.get(SITE_URL)
 
     if response.status_code == 200:
@@ -63,7 +86,16 @@ def air_data(): # Получаем данные воздуха
         print(f'Концентрация O3: {o3}ppm')
 
 
-general_data()
-astronomy_data()
-air_data()
+main_menu = input(f'Хотите узнать данные о погоде или воспользоваться переводчиком? (погода\перевод): ')
+if main_menu.lower() == 'погода':
+    a = choice_city()
+    general_data(a)
+    astronomy_data(a)
+    air_data(a)
+elif main_menu.lower() == 'перевод':
+    text = input('Введите текст для перевода: ')
+    print(tt(text))
 
+
+end = datetime.datetime.now()
+print(end - st)
